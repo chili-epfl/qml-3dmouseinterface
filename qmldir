@@ -1,0 +1,3 @@
+module MouseInterface3D
+plugin qml-3DMouseInterface
+
