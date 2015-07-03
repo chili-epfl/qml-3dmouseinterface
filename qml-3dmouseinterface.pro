@@ -1,5 +1,6 @@
 TEMPLATE = lib
-TARGET = qml-3DMouseInterface
+TARGET =
+
 QT += qml quick 3dcore 3drenderer 3dcore-private
 
 CONFIG += qt plugin c++11

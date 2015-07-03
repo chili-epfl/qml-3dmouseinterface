@@ -1,3 +1,11 @@
+/**
+ * @file 3dmouseinterface.cpp
+ * @brief A mouse interface for qt3d scene3d
+ * @author Lorenzo Lucignano
+ * @version 1.0
+ * @date 2015-07-02
+ */
+
 #include "3dmouseinterface.h"
 
 /*The class assume that the property is scene3D is a Scene3D element holding inside the root entity of the 3D scene graph.

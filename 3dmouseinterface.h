@@ -1,3 +1,13 @@
+/**
+ * @file 3dmouseinterface.h
+ * @brief A mouse interface for qt3d scene3d
+ * @author Lorenzo Lucignano
+ * @version 1.0
+ * @date 2015-07-02
+ */
+
+
+
 #ifndef MOUSEINTERFACE3D_H
 #define MOUSEINTERFACE3D_H
 
