@@ -227,11 +227,11 @@ void MouseInterface3D::select(QVector2D mouseXYNormalized){
     }
     if(m_selectedItems.contains(hitEntity)){
         m_selectedItems.remove(hitEntity);
-        qDebug()<<hitEntity->property("name");
+        //qDebug()<<hitEntity->property("name");
         hitEntity->setProperty("clicked",false);
     }
     else if(hitEntity){
-        qDebug()<<hitEntity->property("name");
+        //qDebug()<<hitEntity->property("name");
         m_selectedItems.insert(hitEntity);
         hitEntity->setProperty("clicked",true);
     }
