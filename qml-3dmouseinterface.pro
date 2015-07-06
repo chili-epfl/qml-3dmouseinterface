@@ -1,5 +1,5 @@
 TEMPLATE = lib
-TARGET =
+TARGET =qml-3DMouseInterface
 
 QT += qml quick 3dcore 3drenderer 3dcore-private
 
@@ -23,9 +23,9 @@ OTHER_FILES += qmldir
 
 qmldir.files = qmldir
 
-    installPath = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
-    qmldir.path = $$installPath
-    target.path = $$installPath
-    INSTALLS += target qmldir
+installPath = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
+qmldir.path = $$installPath
+target.path = $$installPath
+INSTALLS += target qmldir
 
 
