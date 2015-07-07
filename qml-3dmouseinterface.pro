@@ -1,7 +1,7 @@
 TEMPLATE = lib
 TARGET =qml-3DMouseInterface
 
-QT += qml quick 3dcore 3drenderer 3dcore-private
+QT += qml quick 3dcore 3drenderer 3dcore-private 3drenderer-private
 
 CONFIG += qt plugin c++11
 CONFIG -= android_install

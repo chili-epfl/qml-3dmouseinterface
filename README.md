@@ -20,16 +20,15 @@ The QML API consists of the single element **MouseInterface3D**. In order to wor
 
 The slot `select` can be invoked by `MouseArea.onClick`, passing the normalized coordinate of the mouse pointer as arguments.
 
-On `select` is called, the plugin looks for all the Entities in scene3D having:
+On `select` is called, the plugin looks for all the Entities in scene3D having both a Qt3D::QAbstractMesh and Qt3D::QTransform components;
 
-1. Both a Qt3D::QAbstractMesh and Qt3D::QTransform components;
-2. The property `interactive` true (interactive should be added as custom flag in the qml code)
-
-Moreover, the plugin assumes that the Entities have a boolean `clicked` property, that is set when the user clicks on the object.
+If a new entity is selected, the signal **selectedItemsChanged(QQmlListProperty<Qt3D::QEntity>)** is emitted.
 
 
 Desktop Build
 -------------
+
+0. Install assimp-dev or the sample and the import of scene will not work! 
 
 1. Build and install qt  (http://qt-project.org/wiki/Building_Qt_5_from_Git):
 	For making the compilation faster, skip the following modules in the configure step
@@ -46,7 +45,6 @@ Desktop Build
 
   Now the Chilitags QML plugin is installed alongside Qt's QML plugins and can be used similar to any other plugin.
 
-
 Android Build
 -------------
 
@@ -58,7 +56,7 @@ In addition to the OS, Qt requirements, you need:
 
 These instructions assume `armv7-a` target architecture. For other architectures, adapt the instructions to your liking.
 
-
+0. Build assimp for android (soon)
 
 1. Build and install `qt` from (http://qt-project.org/wiki/Qt5ForAndroidBuilding):
 
@@ -102,5 +100,5 @@ qmlplugindump MouseInterface3D 1.0 [qt-build]/qtbase/qml/MouseInterface3D > [qt-
 Running Samples
 ---------------
 
-The folder [samples/] contains a simple qml demo. By clicking on the objects, those change material properties. 
+The folder [samples/] contains a simple qml demo. By clicking on the objects, the selection is shown in a text box. 
 

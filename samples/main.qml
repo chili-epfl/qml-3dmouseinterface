@@ -10,7 +10,14 @@ ApplicationWindow {
     width: 640
     height: 480
     visible: true
-
+    Text{
+        id:text
+        text:"Hello"
+        font.pointSize: 24
+        width: 100
+        height: 100
+        z:1
+    }
     Item{
         anchors.fill:parent
         Scene3D {
@@ -26,16 +33,21 @@ ApplicationWindow {
             id:mouseInterface
             scene3D:scene3D.sceneRoot
             camera:scene3D.camera
+            onSelectedItemsChanged:{
+                text.text="";
+                for(var i=0;i<selectedItems.length;i++)
+                    text.text=text.text+selectedItems[i].objectName+",";
+            }
         }
         MouseArea{
             anchors.fill: parent
             onClicked: {
                 mouseInterface.select(Qt.vector2d((2.0 * mouseX)/width - 1.0,1.0-(2.0 * mouseY)/height))
             }
+
         }
+
     }
-
-
 
 
 }

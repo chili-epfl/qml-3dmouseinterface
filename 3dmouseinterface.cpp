@@ -8,36 +8,9 @@
 
 #include "3dmouseinterface.h"
 
+
 /*The class assume that the property is scene3D is a Scene3D element holding inside the root entity of the 3D scene graph.
 * The rendered objects are assumed to be ONLY childen of those entities having a QMesh component, or children of such objects.
-* If for some reason your qml contains the objects are declared inside an entity that doesn't have a mesh component,
-* it will not be take into account.
-* Example.
-* Entity{
-*   id:root
-*   Camera{
-*       Entity{<---------------------not seen
-*           Mesh{id:mesh}
-*           components:[mesh]
-*       }
-*   }
-* }
-* Entity{
-*   id:root
-*   Entity{
-*       Mesh{id:mesh}
-*       components[mesh]
-*       Entity{<-------------------- seen (not yet implemeted)
-*           Mesh{id:mesh2}
-*           components:[mesh2]
-*       }
-*   }
-* }
-*
-* The code also expect that the Entity element presents a property
-*   "interactive"--------> the object responds to input events
-*   "clicked"------------> boolean
-*
 */
 
 bool pair_comparator(QPair<Qt3D::QEntity*,qreal> x, QPair<Qt3D::QEntity*,qreal> y){return (x.second<y.second);}
@@ -64,6 +37,7 @@ QPair<QVector3D,QVector3D> transform_aabb(Qt3D::QAxisAlignedBoundingBox aabb,QMa
     QVector3D min_c1,min_c2,min_c3;
     QVector3D max_c1,max_c2,max_c3;
 
+
     if(xa.x()<xb.x()){
         min_c1.setX(xa.x());
         max_c1.setX(xb.x());
@@ -88,7 +62,8 @@ QPair<QVector3D,QVector3D> transform_aabb(Qt3D::QAxisAlignedBoundingBox aabb,QMa
     }
     else{
         max_c1.setZ(xa.z());
-        min_c1.setZ(xb.z());
+        min_c1.setZ(xb.z());    //QSet<Qt3D::QEntity*> m_selectedItems;
+
     }
 
     if(ya.x()<yb.x()){
@@ -165,7 +140,7 @@ MouseInterface3D::~MouseInterface3D()
 {
 }
 
-void MouseInterface3D::setScene3D(Qt3D::QEntity *scene3D){
+void MouseInterface3D::setScene3D(Qt3D::QEntity* scene3D){
     if(scene3D){
         m_sceneroot=scene3D;
     }
@@ -175,7 +150,9 @@ void MouseInterface3D::setCamera(Qt3D::QCamera *camera){
         m_camera=camera;
     }
 }
-
+QQmlListProperty<Qt3D::QEntity> MouseInterface3D::selectedItems(){
+    return QQmlListProperty<Qt3D::QEntity>(this,m_selectedItems);
+}
 
 
 void MouseInterface3D::select(QVector2D mouseXYNormalized){
@@ -199,56 +176,83 @@ void MouseInterface3D::select(QVector2D mouseXYNormalized){
     sign[1] = (ray_dir_inv.y() < 0);
     sign[2] = (ray_dir_inv.z() < 0);
     /*TODO: only first-level entries are processed*/
-    QList<Qt3D::QEntity*> entities= m_sceneroot->findChildren<Qt3D::QEntity*>(QString(), Qt::FindDirectChildrenOnly);
-    Qt3D::QEntity* hitEntity=NULL;
-    qreal hitEntityTnear;
-    for (Qt3D::QEntity* entity : entities){
-        if(!entity->property("interactive").isValid()) continue;
-        Qt3D::QAbstractMesh* entity_mesh=NULL;
-        Qt3D::QTransform* entity_transform=NULL;
-        Qt3D::QComponentList components= entity->components();
-        for(Qt3D::QComponent* component: components){
-            if(component->isEnabled()){
-                if(component->inherits("Qt3D::QAbstractMesh")){
-                    entity_mesh=qobject_cast<Qt3D::QAbstractMesh*>(component);
-                }
-                else if(component->inherits("Qt3D::QTransform")){
-                    entity_transform=qobject_cast<Qt3D::QTransform*>(component);
-                }
-            }
-        }
-        if(entity_mesh!=NULL && entity_transform!=NULL){
-            QMatrix4x4 transform_matrix=entity_transform->matrix();
-            Qt3D::QAbstractMeshFunctorPtr mesh_functor=entity_mesh->meshFunctor();
-            Qt3D::QMeshDataPtr data_ptr=mesh_functor.data()->operator ()();
-            Qt3D::QMeshData* mesh_data=data_ptr.data();
-            Qt3D::QAxisAlignedBoundingBox aabb= mesh_data->boundingBox();
-            QPair<QVector3D,QVector3D> aabb_mod=transform_aabb(aabb,transform_matrix);
-            qreal tnear;
-            if(intersects(ray,ray_dir_inv,sign,aabb_mod,tnear)){
-                if(hitEntity==NULL || tnear<hitEntityTnear){
-                    hitEntity=entity;
-                    hitEntityTnear=tnear;
-                }
-            }
-        }
-    }
+
+    qreal hitEntity_tnear;
+
+
+    Qt3D::QEntity* hitEntity=select_recursive_step(m_sceneroot,QMatrix4x4(),hitEntity_tnear,ray,ray_dir_inv,sign);
+
+
     if(m_selectedItems.contains(hitEntity)){
-        m_selectedItems.remove(hitEntity);
-        //qDebug()<<hitEntity->property("name");
-        hitEntity->setProperty("clicked",false);
+        m_selectedItems.removeOne(hitEntity);
+        emit selectedItemsChanged(selectedItems());
+        //qDebug()<<hitEntity->objectName();
     }
     else if(hitEntity){
-        //qDebug()<<hitEntity->property("name");
-        m_selectedItems.insert(hitEntity);
-        hitEntity->setProperty("clicked",true);
+        //qDebug()<<hitEntity->objectName();
+        m_selectedItems.append(hitEntity);
+        emit selectedItemsChanged(selectedItems());
     }
 }
+
+Qt3D::QEntity* MouseInterface3D::select_recursive_step( Qt3D::QEntity* node ,const QMatrix4x4 parents_matrix, qreal &hitEntity_tnear, const Qt3D::QRay3D ray,const QVector3D ray_dir_inv, const int sign[]){
+
+    Qt3D::QAbstractMesh* entity_mesh=NULL;
+    Qt3D::QTransform* entity_transform=NULL;
+    Qt3D::QComponentList components= node->components();
+    qreal local_hitEntity_tnear, child_hitEntity_tnear;
+    Qt3D::QEntity* hitEntity=NULL;
+
+    for(Qt3D::QComponent* component: components){
+        if(component->isEnabled()){
+            if(component->inherits("Qt3D::QAbstractMesh")){
+                entity_mesh=qobject_cast<Qt3D::QAbstractMesh*>(component);
+            }
+            else if(component->inherits("Qt3D::QTransform")){
+                entity_transform=qobject_cast<Qt3D::QTransform*>(component);
+            }
+        }
+    }
+
+    if(entity_mesh!=NULL && entity_transform!=NULL){
+        QMatrix4x4 transform_matrix=parents_matrix*entity_transform->matrix();
+        Qt3D::QAbstractMeshFunctorPtr mesh_functor=entity_mesh->meshFunctor();
+        Qt3D::QMeshDataPtr data_ptr=mesh_functor.data()->operator ()();
+        Qt3D::QMeshData* mesh_data=data_ptr.data();
+        Qt3D::QAxisAlignedBoundingBox aabb= mesh_data->boundingBox();
+        QPair<QVector3D,QVector3D> aabb_mod=transform_aabb(aabb,transform_matrix);
+        if(checkIntersection(ray,ray_dir_inv,sign,aabb_mod,local_hitEntity_tnear)){
+            hitEntity=node;
+        }
+    }
+
+    QList<Qt3D::QEntity*> entities= node->findChildren<Qt3D::QEntity*>(QString(),Qt::FindDirectChildrenOnly);
+    QMatrix4x4 transform_matrix;
+    if(entity_transform!=NULL)
+        transform_matrix=parents_matrix*entity_transform->matrix();
+    else
+        transform_matrix=parents_matrix;
+
+    for (Qt3D::QEntity* entity : entities){
+        if(select_recursive_step(entity,transform_matrix,child_hitEntity_tnear,ray,ray_dir_inv,sign)!=NULL){
+            if(hitEntity==NULL || child_hitEntity_tnear<local_hitEntity_tnear){
+                hitEntity=entity;
+                local_hitEntity_tnear=child_hitEntity_tnear;
+            }
+        }
+    }
+
+    hitEntity_tnear=local_hitEntity_tnear;
+    return hitEntity;
+
+}
+
+
 
 
 /*Code from
  * http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection*/
-bool MouseInterface3D::intersects(const Qt3D::QRay3D ray, const QVector3D ray_dir_inv, const int sign[], const QPair<QVector3D,QVector3D> aabb, qreal &tnear){
+bool MouseInterface3D::checkIntersection(const Qt3D::QRay3D ray, const QVector3D ray_dir_inv, const int sign[], const QPair<QVector3D,QVector3D> aabb, qreal &tnear){
 
     qreal tmin, tmax, tymin, tymax, tzmin, tzmax;
 
