@@ -33,10 +33,8 @@ ApplicationWindow {
             id:mouseInterface
             scene3D:scene3D.sceneRoot
             camera:scene3D.camera
-            onSelectedItemsChanged:{
-                text.text="";
-                for(var i=0;i<selectedItems.length;i++)
-                    text.text=text.text+selectedItems[i].objectName+",";
+            onSelectedItem:{
+                text.text=item.objectName;
             }
         }
         MouseArea{

@@ -65,32 +65,11 @@ Entity {
 
     Entity {
         id:monkey
-        objectName: "monkey"
         components : [
 
             SceneLoader
             {
-                source: "qrc:/monkey.dae"
-            }]
-    }
-    Entity{
-        id:torus
-        objectName: "torus"
-        components : [
-
-            SceneLoader
-            {
-                source: "qrc:/torus.dae"
-            }]
-    }
-    Entity{
-        id:cube
-        objectName: "cube"
-        components : [
-
-            SceneLoader
-            {
-                source: "qrc:/cube.dae"
+                source: "qrc:/test_scene.dae"
             }]
     }
 

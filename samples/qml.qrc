@@ -2,8 +2,6 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>Scene.qml</file>
-        <file>torus.dae</file>
-        <file>monkey.dae</file>
-        <file>cube.dae</file>
+        <file>test_scene.dae</file>
     </qresource>
 </RCC>
