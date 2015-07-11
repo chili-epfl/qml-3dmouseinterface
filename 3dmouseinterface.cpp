@@ -150,9 +150,9 @@ void MouseInterface3D::setCamera(Qt3D::QCamera *camera){
         m_camera=camera;
     }
 }
-QQmlListProperty<Qt3D::QEntity> MouseInterface3D::selectedItems(){
+/*QQmlListProperty<Qt3D::QEntity> MouseInterface3D::selectedItems(){
     return QQmlListProperty<Qt3D::QEntity>(this,m_selectedItems);
-}
+}*/
 
 
 void MouseInterface3D::select(QVector2D mouseXYNormalized){
@@ -182,17 +182,9 @@ void MouseInterface3D::select(QVector2D mouseXYNormalized){
 
     Qt3D::QEntity* hitEntity=select_recursive_step(m_sceneroot,QMatrix4x4(),hitEntity_tnear,ray,ray_dir_inv,sign);
 
+    if(hitEntity)
+        emit selectedItem(hitEntity);
 
-    if(m_selectedItems.contains(hitEntity)){
-        m_selectedItems.removeOne(hitEntity);
-        emit selectedItemsChanged(selectedItems());
-        //qDebug()<<hitEntity->objectName();
-    }
-    else if(hitEntity){
-        //qDebug()<<hitEntity->objectName();
-        m_selectedItems.append(hitEntity);
-        emit selectedItemsChanged(selectedItems());
-    }
 }
 
 Qt3D::QEntity* MouseInterface3D::select_recursive_step( Qt3D::QEntity* node ,const QMatrix4x4 parents_matrix, qreal &hitEntity_tnear, const Qt3D::QRay3D ray,const QVector3D ray_dir_inv, const int sign[]){
@@ -234,9 +226,10 @@ Qt3D::QEntity* MouseInterface3D::select_recursive_step( Qt3D::QEntity* node ,con
         transform_matrix=parents_matrix;
 
     for (Qt3D::QEntity* entity : entities){
-        if(select_recursive_step(entity,transform_matrix,child_hitEntity_tnear,ray,ray_dir_inv,sign)!=NULL){
+        Qt3D::QEntity* hitChild=select_recursive_step(entity,transform_matrix,child_hitEntity_tnear,ray,ray_dir_inv,sign);
+        if(hitChild!=NULL){
             if(hitEntity==NULL || child_hitEntity_tnear<local_hitEntity_tnear){
-                hitEntity=entity;
+                hitEntity=hitChild;
                 local_hitEntity_tnear=child_hitEntity_tnear;
             }
         }

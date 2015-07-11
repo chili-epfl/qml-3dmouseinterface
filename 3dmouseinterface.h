@@ -24,28 +24,24 @@ class MouseInterface3D : public QQuickItem
     Q_DISABLE_COPY(MouseInterface3D)
     Q_PROPERTY(Qt3D::QEntity* scene3D WRITE setScene3D)
     Q_PROPERTY(Qt3D::QCamera* camera WRITE setCamera)
-    Q_PROPERTY(QQmlListProperty<Qt3D::QEntity> selectedItems READ selectedItems NOTIFY selectedItemsChanged)
 public:
     MouseInterface3D(QQuickItem *parent = 0);
     ~MouseInterface3D();
     void setScene3D(Qt3D::QEntity* scene3D);
     void setCamera(Qt3D::QCamera* camera);
 
-    QQmlListProperty<Qt3D::QEntity> selectedItems();
 
 public slots:
     void select(QVector2D mouseXYNormalized);
 signals:
-    void selectedItemsChanged(QQmlListProperty<Qt3D::QEntity> selectedItems);
+    void selectedItem(Qt3D::QEntity* item);
 
 private:
     bool checkIntersection(const Qt3D::QRay3D ray, const QVector3D ray_dir_inv, const int sign[], const QPair<QVector3D,QVector3D> aabb,qreal& tnear);
     Qt3D::QEntity* select_recursive_step(  Qt3D::QEntity* node ,const QMatrix4x4 parents_matrix, qreal &hitEntity_tnear, const Qt3D::QRay3D ray,const QVector3D ray_dir_inv, const int sign[]);
-    //Sorted list of entities.
-    //QSet<Qt3D::QEntity*> m_selectedItems;
     Qt3D::QEntity* m_sceneroot;
     Qt3D::QCamera* m_camera;
-    QList<Qt3D::QEntity*> m_selectedItems;
+
 
 };
 

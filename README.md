@@ -8,7 +8,7 @@ The plugin is going to be obsolete once an official implementation is released.
 The following is required for the plugin to work:
 
   - Ubuntu `14.04`
-  - Qt `5.5` + QT3d `2.0`
+  - Qt `5.5` + QT3d `2.0` (with patch https://codereview.qt-project.org/#/c/120903/)
   
 QML API
 -------
@@ -22,7 +22,7 @@ The slot `select` can be invoked by `MouseArea.onClick`, passing the normalized 
 
 On `select` is called, the plugin looks for all the Entities in scene3D having both a Qt3D::QAbstractMesh and Qt3D::QTransform components;
 
-If a new entity is selected, the signal **selectedItemsChanged(QQmlListProperty<Qt3D::QEntity>)** is emitted.
+If a new entity is selected, the signal **selectedItem(Qt3D::QEntity*)** is emitted.
 
 
 Desktop Build
