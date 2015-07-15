@@ -40,6 +40,7 @@ ApplicationWindow {
         MouseArea{
             anchors.fill: parent
             onClicked: {
+                text.text=""
                 mouseInterface.select(Qt.vector2d((2.0 * mouseX)/width - 1.0,1.0-(2.0 * mouseY)/height))
             }
 

@@ -37,8 +37,9 @@ signals:
     void selectedItem(Qt3D::QEntity* item);
 
 private:
-    bool checkIntersection(const Qt3D::QRay3D ray, const QVector3D ray_dir_inv, const int sign[], const QPair<QVector3D,QVector3D> aabb,qreal& tnear);
-    Qt3D::QEntity* select_recursive_step(  Qt3D::QEntity* node ,const QMatrix4x4 parents_matrix, qreal &hitEntity_tnear, const Qt3D::QRay3D ray,const QVector3D ray_dir_inv, const int sign[]);
+    bool checkIntersectionRay_AABB(const Qt3D::QRay3D ray, const Qt3D::QAxisAlignedBoundingBox aabb);
+    bool checkIntersectionRay_Triangle(const Qt3D::QRay3D ray, const QVector<QVector3D> triangle,qreal &tnear);
+    Qt3D::QEntity* select_recursive_step(  Qt3D::QEntity* node ,const QMatrix4x4 parents_matrix, qreal &hitEntity_tnear, const Qt3D::QRay3D ray);
     Qt3D::QEntity* m_sceneroot;
     Qt3D::QCamera* m_camera;
 

@@ -44,9 +44,9 @@ Entity {
     ]
 
 
-    SphereMesh {
+    CuboidMesh {
         id: sphereMesh
-        radius: 3
+    //    radius: 3
     }
 
     Transform {
